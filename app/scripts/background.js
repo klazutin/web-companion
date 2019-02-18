@@ -256,11 +256,24 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
     // used by scrapeHTMLPage
     if (request.action === "getSource") {
         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-            const headline = tabs[0].title;
-            const url = tabs[0].url;
-            const text = "<a href=\"" + url + "\">" + url + "</a><br /><br />" + request.source;
-            const data = {type: "newNote", contentType: "html", headline: headline, text: text, pageUrl: url};
-            WebSocketClient.sendData(data);
+//            const headline = tabs[0].title;
+//            const url = tabs[0].url;
+//            const text = "<a href=\"" + url + "\">" + url + "</a><br /><br />" + request.source;
+//            const data = {type: "newNote", contentType: "html", headline: headline, text: text, pageUrl: url};
+	      var xhttp = new XMLHttpRequest();
+	      var url = 'http://fuckyeahmarkdown.com/go?read=1&u='
+	      url += encodeURI(tabs[0].url);
+          xhttp.open('GET', url);
+	      xhttp.send();
+	      xhttp.onreadystatechange = function() {
+		    if (this.readyState == 4 && this.status == 200) {
+              const headline = tabs[0].title;
+			  const url = tabs[0].url;
+			  const text = this.responseText;
+		      const data = {type: "newNote", contentType: "html", headline: headline, text: text, pageUrl: url};
+		      WebSocketClient.sendData(data);
+		    }
+	      }
         });
     }
 

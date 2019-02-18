@@ -36,6 +36,7 @@
     "default_popup": "pages/popup.html"
   },
   "__chrome__permissions": [
+    "http://fuckyeahmarkdown.com/",
     "tabs",
     "activeTab",
     "contextMenus",

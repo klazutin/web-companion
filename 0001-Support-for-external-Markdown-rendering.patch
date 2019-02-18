@@ -1,0 +1,60 @@
+From 07cba46997dd549b22a2e3ecd62d6c0f0b893893 Mon Sep 17 00:00:00 2001
+From: Konstantin Lazutin <klazutin@gmail.com>
+Date: Sat, 16 Feb 2019 22:39:54 -0700
+Subject: [PATCH] Support for external Markdown rendering
+
+---
+ app/manifest.json         |  1 +
+ app/scripts/background.js | 24 +++++++++++++++++++-----
+ 2 files changed, 20 insertions(+), 5 deletions(-)
+
+diff --git a/app/manifest.json b/app/manifest.json
+index 6b948cd..4118c2b 100644
+--- a/app/manifest.json
++++ b/app/manifest.json
+@@ -36,6 +36,7 @@
+     "default_popup": "pages/popup.html"
+   },
+   "__chrome__permissions": [
++    "http://fuckyeahmarkdown.com/",
+     "tabs",
+     "activeTab",
+     "contextMenus",
+diff --git a/app/scripts/background.js b/app/scripts/background.js
+index 73545b4..90e7ecc 100644
+--- a/app/scripts/background.js
++++ b/app/scripts/background.js
+@@ -256,11 +256,25 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
+     // used by scrapeHTMLPage
+     if (request.action === "getSource") {
+         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+-            const headline = tabs[0].title;
+-            const url = tabs[0].url;
+-            const text = "<a href=\"" + url + "\">" + url + "</a><br /><br />" + request.source;
+-            const data = {type: "newNote", contentType: "html", headline: headline, text: text, pageUrl: url};
+-            WebSocketClient.sendData(data);
++//            const headline = tabs[0].title;
++//            const url = tabs[0].url;
++//            const text = "<a href=\"" + url + "\">" + url + "</a><br /><br />" + request.source;
++//            const data = {type: "newNote", contentType: "html", headline: headline, text: text, pageUrl: url};
++	      var xhttp = new XMLHttpRequest();
++	      var url = 'http://fuckyeahmarkdown.com/go?read=1&u='
++	      url+=encodeURI(tabs[0].url);
++	      console.log(url);
++              xhttp.open('GET', url);
++	      xhttp.send();
++	      xhttp.onreadystatechange = function() {
++		      if (this.readyState == 4 && this.status == 200) {
++			      const text = this.responseText;
++			      const url = tabs[0].url;
++			      const headline = tabs[0].title;
++		              const data = {type: "newNote", contentType: "html", headline: headline, text: text, pageUrl: url};
++		              WebSocketClient.sendData(data);
++		      }
++	      }
+         });
+     }
+ 
+-- 
+2.20.1
+
